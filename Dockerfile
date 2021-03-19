@@ -6,7 +6,7 @@ ARG FUNCTION_DIR="/entryPoint"
 ARG BASE_IMAGE
 ARG CMD_LINE
 
-FROM ${BASE_IMAGE} as build-image
+FROM node:12-buster as build-image
 
 # Include global arg in this stage of the build
 ARG FUNCTION_DIR
@@ -20,7 +20,7 @@ RUN apt-get update && \
     unzip \
     libcurl4-openssl-dev \
     autoconf \
-    libtoolize 
+    libtool
 
 # Copy the locatl entrypoint code into the image to build
 COPY entryPoint/* ${FUNCTION_DIR}/

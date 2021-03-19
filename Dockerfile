@@ -2,7 +2,7 @@
 # protocol adaptor
 
 # Define custom function directory
-ARG FUNCTION_DIR=/entryPoint
+ARG FUNCTION_DIR="/entryPoint"
 ARG BASE_IMAGE
 ARG CMD_LINE
 

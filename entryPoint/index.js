@@ -1,8 +1,9 @@
 const fs = require('fs').promises
 const childProcess = require('child_process')
 
-const inputFile = '/tmp/input.json'
-const outputFile = '/tmp/output.json'
+const dataDir = '/extendo-compute'
+const inputFile = `${dataDir}/input.json`
+const outputFile = `${dataDir}/output.json`
 
 module.exports.handler = async (event) => {
   try {
@@ -14,8 +15,8 @@ module.exports.handler = async (event) => {
     const child = childProcess.exec(process.env.CMD_LINE, { env: { GITHUB_TOKEN: contextParts.token } })
     await new Promise((resolve, reject) => {
       child.on('error', err => reject(err))
-      child.on('exit', async code => {
-        if (code !== 0) reject(new Error('exit code ' + code))
+      child.on('exit', code => {
+        if (code !== 0) return reject(new Error('Exec exited with non-zero code: ' + code))
         resolve()
       })
     })

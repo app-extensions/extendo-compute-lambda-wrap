@@ -8,11 +8,13 @@ const errorFile = `${dataDir}/error.json`
 
 module.exports.handler = async (event) => {
   try {
-    console.log(`Command line: ${process.env.CMD_LINE}`)
-    console.log(JSON.stringify(event, null, 2))
-    // Grab the input and structure it as an input file
-    // NOTE: here `event` is the actual payload where as in the other handlers it is the netwoek event object
-    // (with all the headers etc) that has a `body` prop.
+    // Since Lambda can reuse containers, clean up our key files from what might have been a previous run.
+    await fs.rm(outputFile, { force: true })
+    await fs.rm(errorFile, { force: true })
+
+    // Grab the event parts and stash for use by the target handler.
+    // Note the difference here between this and Node deployed in a zip. 
+    // See https://github.com/aws/aws-lambda-nodejs-runtime-interface-client/issues/17
     const { params, contextParts } = event
     await fs.mkdir(dataDir, { recursive: true })
     await fs.writeFile(inputFile, JSON.stringify(params, null, 2))
@@ -24,29 +26,27 @@ module.exports.handler = async (event) => {
       child.stderr.on('data', data => console.log(`child-err: ${data}`))
       child.on('error', error => reject(error))
       child.on('exit', code => {
-        if (code !== 0) return reject(new Error('Exec exited with non-zero code: ' + code))
+        // purposefully reject with a non-Error here so the catch knows to look for an error file
+        if (code !== 0) return reject('Exec exited with non-zero code: ' + code)
         resolve()
       })
     })
 
-    // Grab the output and structure it as the response
+    // Grab the output and return it as an object. 
+    // Note the difference here between this and Node deployed in a zip. 
+    // See https://github.com/aws/aws-lambda-nodejs-runtime-interface-client/issues/17
     const output = await fs.readFile(outputFile)
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(output)
-    }
+    return JSON.parse(output)
   } catch (error) {
+    // rethrow if it's already an error. Likely means that it happened in this wrapper
     if (error instanceof Error) throw error
-    const output = await readFile(errorFile)
-    const parsed = JSON.parse(output.toString())
-    throw parsed || error
+    try {
+      // See if the nested handler left us an error file. If so, re throw whatever they left 
+      const output = await fs.readFile(errorFile)
+      throw JSON.parse(output)
+    } catch (err) {
+      // all else fails, rethrow the original object (known not to be an Error)
+      throw error
+    }
   }
-}
-
-async function readFile(file) {
-  try {
-    // await in the try so we catch any error 
-    return await fs.readFile(file)
-  } catch (error) { return null }
 }

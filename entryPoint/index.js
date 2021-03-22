@@ -8,8 +8,9 @@ const errorFile = `${dataDir}/error.json`
 
 module.exports.handler = async (event) => {
   try {
+    console.log(JSON.stringify(event, null, 2))
     // Grab the input and structure it as an input file
-    const { params, contextParts } = JSON.parse(event.body)
+    const { params, contextParts } = parseJSONInput(event.body)
     await fs.writeFile(inputFile, JSON.stringify(params, null, 2))
 
     // run the command line spec'd in the environment (left there when we built the image) and include any context
@@ -31,8 +32,9 @@ module.exports.handler = async (event) => {
       body: JSON.stringify(output)
     }
   } catch (error) {
-    console.log(`Exec error: ${error.message}`)
-    const output = await readFile(outputFile)
+    console.dir(error)
+    if (error.statusCode) return error
+    const output = await readFile(errorFile)
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json' },
@@ -45,4 +47,16 @@ function readFile(file) {
   try {
     return fs.readFile(file)
   } catch (error) { return null }
+}
+
+function parseJSONInput(source) {
+  try {
+    return JSON.parse(source)
+  } catch (error) {
+    throw {
+      statusCode: 400,
+      headers: { 'Content-Type': 'application/json' },
+      body: { errorType: 'Error', errorMessage: `Invalid body: ${source}` }
+    }
+  }
 }

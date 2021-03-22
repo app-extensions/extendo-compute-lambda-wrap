@@ -8,16 +8,22 @@ const errorFile = `${dataDir}/error.json`
 
 module.exports.handler = async (event) => {
   try {
+    console.log(`Command line: ${process.env.CMD_LINE}`)
     console.log(JSON.stringify(event, null, 2))
     // Grab the input and structure it as an input file
     // NOTE: here `event` is the actual payload where as in the other handlers it is the netwoek event object
     // (with all the headers etc) that has a `body` prop.
     const { params, contextParts } = event
+    try {
+      const files = await fs.readdir('/');
+      for await (const file of files) console.log(file)
+    } catch (err) {
+      console.error(err);
+    }
     await fs.mkdir(dataDir, { recursive: true })
     await fs.writeFile(inputFile, JSON.stringify(params, null, 2))
 
     // run the command line spec'd in the environment (left there when we built the image) and include any context
-    console.log(process.env.CMD_LINE)
     const child = childProcess.exec(process.env.CMD_LINE, { env: { GITHUB_TOKEN: contextParts.token } })
     await new Promise((resolve, reject) => {
       child.on('error', error => reject(error))
@@ -46,9 +52,10 @@ module.exports.handler = async (event) => {
   }
 }
 
-function readFile(file) {
+async function readFile(file) {
   try {
-    return fs.readFile(file)
+    // await in the try so we catch any error 
+    return await fs.readFile(file)
   } catch (error) { return null }
 }
 

@@ -13,6 +13,7 @@ module.exports.handler = async (event) => {
     // NOTE: here `event` is the actual payload where as in the other handlers it is the netwoek event object
     // (with all the headers etc) that has a `body` prop.
     const { params, contextParts } = event
+    await fs.mkdir(dataDir, { recursive: true })
     await fs.writeFile(inputFile, JSON.stringify(params, null, 2))
 
     // run the command line spec'd in the environment (left there when we built the image) and include any context

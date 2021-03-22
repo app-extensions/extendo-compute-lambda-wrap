@@ -15,8 +15,8 @@ module.exports.handler = async (event) => {
     // (with all the headers etc) that has a `body` prop.
     const { params, contextParts } = event
     try {
-      const files = await fs.readdir('/');
-      for await (const file of files) console.log(file)
+      const stat = await fs.stat(dataDir)
+      console.log('0' + (stat.mode & parseInt('777', 8)).toString(8))
     } catch (err) {
       console.error(err);
     }

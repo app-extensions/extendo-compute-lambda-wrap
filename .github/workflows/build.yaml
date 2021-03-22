@@ -37,5 +37,5 @@ jobs:
         ECR_REPOSITORY: ${{ github.event.inputs.repository}}
         IMAGE_TAG: ${{ github.event.inputs.tag }}
       run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg CMD_LINE=${{ github.event.inputs.commandLine }} --build-arg BASE_IMAGE=${{ github.event.inputs.base }} .
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg NESTED_CMD_LINE=${{ github.event.inputs.commandLine }} --build-arg BASE_IMAGE=${{ github.event.inputs.base }} .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG

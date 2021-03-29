@@ -52,5 +52,6 @@ RUN rm -rf /tmp/v8*
 COPY --from=build-image ${FUNCTION_DIR} ${FUNCTION_DIR}
 
 # On startup run the the Runtime Interface Client and tell it about our handler 
-ENTRYPOINT ["/usr/local/bin/npx", "aws-lambda-ric"]
+# ENTRYPOINT ["/usr/local/bin/npx", "aws-lambda-ric"]
+ENTRYPOINT ["node", "/entrypoint/node_modules/aws-lambda-ric/lib/index.js"]
 CMD ["index.handler"]

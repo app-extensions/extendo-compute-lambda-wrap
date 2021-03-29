@@ -1,5 +1,5 @@
 // drop this in /tmp/test in a built/wrapped mermaid render image and then run with `node debug.js`
-const entry = require('./entryPoint/index').handler
+const entry = require('./index').handler
 const data = {
   params: {
     "content": "https://raw.githubusercontent.com/app-extensions/test/main/Lorenz.ipynb",
@@ -11,7 +11,6 @@ const data = {
     }
   },
   contextParts: {
-    token: "ljdsflksjlkfds"
   }
 
 }

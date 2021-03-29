@@ -27,7 +27,8 @@ module.exports.handler = async (event) => {
 
     console.log('about to exec')
     console.log (`cmd: ${process.env.CMD_LINE}`)
-    console.log(`tok: ${contextParts.token.slice(-8)}`)
+    const token = contextParts.token
+    console.log(`tok: ${(token || '').slice(-8)}`)
     // run the command line spec'd in the environment (left there when we built the image) and include any context
     const child = childProcess.exec(process.env.CMD_LINE, { env: { GITHUB_TOKEN: contextParts.token } })
     await new Promise((resolve, reject) => {

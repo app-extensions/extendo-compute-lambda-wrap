@@ -6,7 +6,7 @@ ARG FUNCTION_DIR="/entryPoint"
 ARG BASE_IMAGE
 ARG NESTED_CMD_LINE
 
-FROM node:12-buster as build-image
+FROM node:10-buster as build-image
 
 # Include global arg in this stage of the build
 ARG FUNCTION_DIR

@@ -25,12 +25,9 @@ module.exports.handler = async (event) => {
     console.log('between mkdir and write input file')
     fs.writeFileSync(inputFile, JSON.stringify(params, null, 2))
 
-    console.log('about to exec')
-    console.log (`cmd: ${process.env.CMD_LINE}`)
     const token = contextParts.token
-    console.log(`tok: ${(token || '').slice(-8)}`)
     // run the command line spec'd in the environment (left there when we built the image) and include any context
-    const child = childProcess.exec(process.env.CMD_LINE, { env: { GITHUB_TOKEN: contextParts.token } })
+    const child = childProcess.exec(process.env.CMD_LINE, { env: {...process.env, GITHUB_TOKEN: contextParts.token } })
     await new Promise((resolve, reject) => {
       child.stdout.on('data', data => console.log(`child-out: ${data}`))
       child.stderr.on('data', data => console.log(`child-err: ${data}`))

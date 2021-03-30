@@ -46,12 +46,11 @@ ENV CMD_LINE=${NESTED_CMD_LINE}
 
 # Set working directory of the image to the entry point's root directory
 WORKDIR ${FUNCTION_DIR}
-RUN rm -rf /tmp/v8*
+RUN rm -rf /tmp/v8* && mkdir /tmp/extendo-compute
 
 # Copy in the built entrypoint code into the final image location
 COPY --from=build-image ${FUNCTION_DIR} ${FUNCTION_DIR}
 
 # On startup run the the Runtime Interface Client and tell it about our handler 
-ENTRYPOINT ["npx", "aws-lambda-ric"]
+ENTRYPOINT ["/entryPoint/node_modules/aws-lambda-ric/bin/index.js"]
 CMD [ "index.handler" ]
-# ENTRYPOINT ["/usr/bin/node", "/entryPoint/node_modules/aws-lambda-ric/lib/index.js", "index.handler"]
